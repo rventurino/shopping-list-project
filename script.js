@@ -2,6 +2,7 @@ const itemForm = document.getElementById('item-form')
 const itemInput = document.getElementById('item-input')
 const itemList = document.getElementById('item-list')
 const clearBtn = document.getElementById('clear')
+const itemFilter = document.getElementById('filter')
 
 function addItem(e) {
     e.preventDefault()
@@ -21,8 +22,13 @@ function addItem(e) {
     const button = createButton('remove-item btn-link text-red')
     //add button to li
     li.appendChild(button)
-    //add li to UL 
+    //add li to UL in DOM
     itemList.appendChild(li)
+
+    //check UI in case empty
+    //will bring back filter and clear buttons if not present
+    checkUI()
+
     //clear input
     itemInput.value = ''
     
@@ -56,16 +62,57 @@ function removeItem(e) {
     //e.target = icon
     //e.target.parentElement = button containing icon
     //e.target.parentElement.parentElement = entire LI containing text, button, and icon
-    e.target.parentElement.parentElement.remove()
+    if(confirm('Are you sure?')){
+        e.target.parentElement.parentElement.remove()
+        checkUI()
+    }
+
 
    }
 }
 
 //////////////////////////////////
 
+//clear button functionality
 function clearItems() {
-    while(itemList.firstChild) {
-        itemList.removeChild(itemList.firstChild)
+    if(confirm('Are you sure you want to remove all items?')){
+        while(itemList.firstChild) {
+            itemList.removeChild(itemList.firstChild)
+        }
+        checkUI()
+    }
+
+}
+
+//////////////////////////////////
+
+
+function filterItems(e){
+    const items = itemList.querySelectorAll('li')
+    const text = e.target.value.toLowerCase();
+
+    items.forEach(item => {
+        const itemName = item.firstChild.textContent.toLowerCase();
+        if (itemName.indexOf(text) != -1){
+            item.style.display = 'flex'
+        } else{
+            item.style.display = 'none'
+        }
+    });
+}
+
+
+//////////////////////////////////
+
+//Check UI state, if list is empty eliminate the clear button and "filter" box
+function checkUI(){
+    const items = itemList.querySelectorAll('li')
+    if (items.length === 0){
+        clearBtn.style.display = 'none'
+        itemFilter.style.display = 'none'
+    } else{
+        clearBtn.style.display = 'block'
+        itemFilter.style.display = 'block'
     }
 }
 
@@ -76,3 +123,7 @@ itemForm.addEventListener('submit', addItem)
 itemList.addEventListener('click', removeItem)
 //event listener to clear entire list by clicking clear all
 clearBtn.addEventListener('click', clearItems)
+//Filter items based on text input
+itemFilter.addEventListener('input', filterItems)
+
+checkUI();
